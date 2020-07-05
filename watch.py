@@ -1,6 +1,7 @@
 import os
 import time
 from watchdog.events import FileSystemEventHandler
+from watchdog.events import FileCreatedEvent
 from watchdog.observers import Observer
 from pathlib import PurePath
 import subprocess
@@ -9,14 +10,15 @@ import signal
 
 class Mp4FileSystemEventHandler(FileSystemEventHandler):
     def on_created(self, event):
-        # TODO ディレクトリ作成ケース
         # TODO 他から移動ケース
-        src_path = event.src_path
-        pp = PurePath(src_path)
-        if pp.suffix != '.gif':
-            output_path = "%s/%s.gif" % (os.path.dirname(src_path), pp.stem)
-            subprocess.run(['ffmpeg', '-i', event.src_path, '-vf',
-                            'scale=320:-1', '-r', '10', output_path])
+        if(type(event) == FileCreatedEvent):
+            src_path = event.src_path
+            pp = PurePath(src_path)
+            if pp.suffix != '.gif':
+                output_path = "%s/%s.gif" % (
+                    os.path.dirname(src_path), pp.stem)
+                subprocess.run(['ffmpeg', '-i', event.src_path, '-vf',
+                                'scale=320:-1', '-r', '10', output_path])
 
 
 exit_flag = False
