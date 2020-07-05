@@ -9,16 +9,22 @@ import signal
 
 
 class Mp4FileSystemEventHandler(FileSystemEventHandler):
-    def on_created(self, event):
-        # TODO 他から移動ケース
+
+    def __init__(self):
+        # Watched files set
+        self.watched = {}
+
+    def on_any_event(self, event):
         if(type(event) == FileCreatedEvent):
             src_path = event.src_path
-            pp = PurePath(src_path)
-            if pp.suffix != '.gif':
-                output_path = "%s/%s.gif" % (
-                    os.path.dirname(src_path), pp.stem)
-                subprocess.run(['ffmpeg', '-i', event.src_path, '-vf',
-                                'scale=320:-1', '-r', '10', output_path])
+            if not src_path in self.watched:
+                self.watched[src_path] = True
+                pp = PurePath(src_path)
+                if pp.suffix != '.gif':
+                    output_path = "%s/%s.gif" % (
+                        os.path.dirname(src_path), pp.stem)
+                    subprocess.run(['ffmpeg', '-i', event.src_path, '-vf',
+                                    'scale=320:-1', '-r', '10', output_path])
 
 
 exit_flag = False
